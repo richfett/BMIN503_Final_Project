@@ -24,16 +24,73 @@ Being in the field of medicine, gene therapy is an interdisciplinary field. Rang
 
 ## Methods {#sec-methods}
 
-Describe the data used and general methodological approach used to address the problem described in the @sec-introduction. Subsequently, incorporate full R code necessary to retrieve and clean data, and perform analysis. Be sure to include a description of code so that others (including your future self) can understand what you are doing and why.
+Different databases were explored and used for data extraction. More databases will be explored.
 
 ```{r}
+#OMIM (Online Mendelian Inheritance in Man org) database extracted files
+
+#This file provides links between the genes in OMIM and other gene identifiers
+omim1 <- read.table("https://omim.org/static/omim/data/mim2gene.txt", header = FALSE, sep = "\t")
+colnames(omim1) <- c("MIM Number", "MIM Entry Type", "Entrez Gene ID (NCBI)", "Approved Gene Symbol (HGNC)", "Ensembl Gene ID (Ensembl)")
+head(omim1)
+
+#Table of MIM numbers and titles
+omim2 <- read.table("https://data.omim.org/downloads/E49QMjV2RgOEwkO6viPNOQ/mimTitles.txt", header = FALSE, fill =TRUE, sep = "\t")
+colnames(omim2) <- c("Prefix", "MIM Number", "Preferred Title", "Symbols", "Notes")
+head(omim2)
+
+#OMIM Synopsis, genomic coordiantes, and inheritance
+omim3 <- read.table("https://data.omim.org/downloads/E49QMjV2RgOEwkO6viPNOQ/genemap2.txt", header = FALSE, fill= TRUE, sep = "\t")
+colnames(omim3) <- c("Chromosome", "Genomic Position Start", "Genomic Position End", "Cyto Location", "Computed Cyto Location", "MIM Number", "Gene/Locus and Related Symbols", "Gene Name", "Approved Gene Symbol", "Entrez Gene ID", "Ensembl Gene ID",  "Comments", "Phenotypes", "Mouse Gene Symbol/ID")
+head(omim3)
+
+
+#Sorted table of OMIM synopsis by disorder
+omim4 <-read.table("C:\\Users\\Hasaj\\OneDrive\\Documents\\BMIN\\BMIN503\\BMIN503_Final_Project\\omim4.txt", header = FALSE, fill= TRUE, sep = "\t")
+colnames(omim4) <- c("Phenotype", "Gene/Locus symbols", "MIM Number", "Cyto Location")
+head(omim4)
+
+
+```
+
+For the purpose of this study, omim3 is the most important table as it has information on gene length. This table will be transformed to find the length of the genes for later use.
+
+```{r}
+library(dplyr)
+
+#Create a table with gene length and populate it with data
+class (omim3$`Genomic Position Start`)
+
+#First convert character to numeric, then add new column with data
+
+omim3.gl <- omim3 %>%
+  mutate(
+    `Genomic Position End` = as.numeric(`Genomic Position End`),
+    `Genomic Position Start` = as.numeric(`Genomic Position Start`),
+    Gene.Length = `Genomic Position End` - `Genomic Position Start`
+  )
 
 
 ```
 
 ## Results {#sec-results}
 
-Describe your results and include relevant tables, plots, and code/comments used to obtain them. You may refer to the @sec-methods as needed. End with a brief conclusion of your findings related to the question you set out to address. You can include references if you'd like, but this is not required.
+With cleaned data, searches for results that fit desired criteria can be made.
+
+To still be included is the joining (left join) of other OMIM tables to add additional information about potential diseases as well as tables from other databases. Additional support for other vectors to be added.
+
+```{r}
+
+#AAV ideal works with gene sizes below 4.5kb
+#Sort data by genes smaller than 4.5kb. The smaller the gene the more likely successful transduction happens, so sorting by size is helpful
+omim3.gl.aav <- omim3.gl %>%
+    filter(Gene.Length < 4500) %>%
+    arrange(Gene.Length)
+head(omim3.gl.aav)
+tail(omim3.gl.aav)
+
+
+```
 
 ## Conclusion
 
