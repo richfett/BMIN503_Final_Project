@@ -14,13 +14,13 @@ Use this template to complete your project throughout the course. Your Final Pro
 
 ## Overview {#sec-overview}
 
-Give a brief a description of your project and its goal(s), what data you are using to complete it, and what two faculty/staff in different fields you have spoken to about your project with a brief summary of what you learned from each person. Include a link to your final project GitHub repository.
+This project aims to simplify finding good gene therapy candidates based on certain parameters. While focusing on AAV based gene therapy, the code will also be usable for other existing and future vectors such as lentivirus and liquid nanoparticle (LNP).
 
 ## Introduction {#sec-introduction}
 
-Describe the problem addressed, its significance, and some background to motivate the problem. This should extend what is in the @sec-overview.
+Genetic diseases are health problems caused by defects in an individuals DNA. Because of this, most medicines and treatments only offer short term relief as the core issue with the DNA remains. In recent history, the rise of gene therapy has given hope to those with genetic diseases in the form of a long lasting cure by providing functional DNA via different vectors. The drawbacks of gene therapy include both the limitations of vectors as well as the long development time of treatments. Because of this, selecting what disease to develop drugs for is a critical step to save time and resources. This code works to provide an important resource to navigate through the thousand of genetic diseases in order to increase efficiency in diseases we can cure.
 
-Explain why your problem is interdisciplinary, what fields can contribute to its understanding, and incorporate background related to what you learned from meeting with faculty/staff.
+Being in the field of medicine, gene therapy is an interdisciplinary field. Ranging from doctors identifying diseases, geneticists sequencing genes, molecular biologists creating vectors, veterinarians overseeing animal trials, data scientists creating databases, and the many government agencies that oversee this, there are multiple fields that can contribute to working on this issue. Important data for this issue includes disease tropism, disease prevalence, and gene size, which can be found in various databases kept by different agencies.
 
 ## Methods {#sec-methods}
 
