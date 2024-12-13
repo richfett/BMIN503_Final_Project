@@ -89,6 +89,18 @@ omim3.gl.aav <- omim3.gl %>%
 head(omim3.gl.aav)
 tail(omim3.gl.aav)
 
+#Liquid nanoparticle vectors typically can handle 8-10 kbp DNA inserts
+omim3.gl.lnp <- omim3.gl %>%
+    filter(Gene.Length < 10000) %>%
+    arrange(Gene.Length)
+
+#Lenti Viral vectors typically can handle 6-8 kbp DNA inserts
+omim3.gl.lv <- omim3.gl %>%
+    filter(Gene.Length < 8000) %>%
+    arrange(Gene.Length)
+
+
+omim3.gl %>% filter(`Approved Gene Symbol` == "ANON1")
 
 ```
 
