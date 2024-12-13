@@ -1,7 +1,7 @@
 ---
-title: "Your Title"
+title: "Using Genetic Disease Databases for Streamlining Gene Therapy Development"
 subtitle: "BMIN503/EPID600 Final Project"
-author: "FirstName LastName"
+author: "Richard Fetterly"
 format: html
 editor: visual
 number-sections: true
@@ -10,21 +10,21 @@ embed-resources: true
 
 ------------------------------------------------------------------------
 
-Use this template to complete your project throughout the course. Your Final Project presentation will be based on the contents of this document. Replace the title/name above and text below with your own, but keep the headers. Feel free to change the theme and other display settings, although this is not required. I added a new sentence
-
 ## Overview {#sec-overview}
 
-This project aims to simplify finding good gene therapy candidates based on certain parameters. While focusing on AAV based gene therapy, the code will also be usable for other existing and future vectors such as lentivirus and liquid nanoparticle (LNP).
+This project aims to simplify finding good gene therapy candidates based on certain parameters. Various databases are used to to create a foundation to assist in the search for viable candidates for Gene Therapy. Whether it's looking for a specific disease, looking for a disease that is similar, or looking for a disease with meaningful prevalence, the code below is designed to assist in gene therapy endeavors.
 
 ## Introduction {#sec-introduction}
 
 Genetic diseases are health problems caused by defects in an individuals DNA. Because of this, most medicines and treatments only offer short term relief as the core issue with the DNA remains. In recent history, the rise of gene therapy has given hope to those with genetic diseases in the form of a long lasting cure by providing functional DNA via different vectors. The drawbacks of gene therapy include both the limitations of vectors as well as the long development time of treatments. Because of this, selecting what disease to develop drugs for is a critical step to save time and resources. This code works to provide an important resource to navigate through the thousand of genetic diseases in order to increase efficiency in diseases we can cure.
 
+Because the main change in a vector is the gene sequence inserted, a gene therapy product that is successful can open the door to faster innovation for other diseases. Once a product is proven to both reach and express in an organ, that vector can then be looked at as a reliable vehicle for delivery of other genes. Because of that, if you can find other diseases whose gene size and tropism is similar to the last, the pathway forward becomes much quicker to bring another treatment to clinical trials.
+
 Being in the field of medicine, gene therapy is an interdisciplinary field. Ranging from doctors identifying diseases, geneticists sequencing genes, molecular biologists creating vectors, veterinarians overseeing animal trials, data scientists creating databases, and the many government agencies that oversee this, there are multiple fields that can contribute to working on this issue. Important data for this issue includes disease tropism, disease prevalence, and gene size, which can be found in various databases kept by different agencies.
 
 ## Methods {#sec-methods}
 
-Different databases were explored and used for data extraction. More databases will be explored.
+Different databases were explored and used for data extraction.
 
 ```{r}
 #OMIM (Online Mendelian Inheritance in Man org) database extracted files
@@ -41,7 +41,7 @@ head(omim2)
 
 #OMIM Synopsis, genomic coordiantes, and inheritance
 omim3 <- read.table("C:\\Users\\Hasaj\\OneDrive\\Documents\\BMIN\\BMIN503\\BMIN503_Final_Project\\omim3.txt", header = FALSE, fill= TRUE, sep = "\t")
-colnames(omim3) <- c("Chromosome", "Genomic Position Start", "Genomic Position End", "Cyto Location", "Computed Cyto Location", "MIM Number", "Gene/Locus and Related Symbols", "Gene Name", "Approved Gene Symbol", "Entrez Gene ID", "Ensembl Gene ID",  "Comments", "Phenotypes", "Mouse Gene Symbol/ID")
+colnames(omim3) <- c("Chromosome", "Genomic Position Start", "Genomic Position End", "Cyto Location", "Computed Cyto Location", "MIM Number", "Gene/Locus and Related Symbols", "Gene Name", "Approved Gene Symbol", "Entrez Gene ID", "Ensembl Gene ID",  "Comments", "Phenotypes", "Mouse.Gene.Symbol.ID")
 head(omim3)
 
 
@@ -53,16 +53,16 @@ head(omim4)
 
 ```
 
-For the purpose of this study, omim3 is the most important table as it has information on gene length. This table will be transformed to find the length of the genes for later use.
+For the purpose of this example analysis, omim3 is the most important table as it has information on gene length. This table will be transformed to find the length of the genes for later use.
 
 ```{r}
 library(dplyr)
+library("tibble")
 
 #Create a table with gene length and populate it with data
-class (omim3$`Genomic Position Start`)
+class (omim3$`Genomic Position Start`) #This alerts us that although the data looks numeric, it isn't
 
 #First convert character to numeric, then add new column with data
-
 omim3.gl <- omim3 %>%
   mutate(
     `Genomic Position End` = as.numeric(`Genomic Position End`),
@@ -71,15 +71,17 @@ omim3.gl <- omim3 %>%
   )
 
 
+
 ```
 
 ## Results {#sec-results}
 
 With cleaned data, searches for results that fit desired criteria can be made.
 
-To still be included is the joining (left join) of other OMIM tables to add additional information about potential diseases as well as tables from other databases. Additional support for other vectors to be added.
+Other tables can be added by joining (left join) of other OMIM tables to add additional information about potential diseases as well as tables from other databases.
 
 ```{r}
+library(ggplot2)
 
 #AAV ideal works with gene sizes below 4.5kb
 #Sort data by genes smaller than 4.5kb. The smaller the gene the more likely successful transduction happens, so sorting by size is helpful
@@ -100,10 +102,79 @@ omim3.gl.lv <- omim3.gl %>%
     arrange(Gene.Length)
 
 
-omim3.gl %>% filter(`Approved Gene Symbol` == "ANON1")
+#Table of genes that have mouse models
+omim3.mm <- omim3[!trimws(omim3$Mouse.Gene.Symbol.ID) == "" & !is.na(omim3$Mouse.Gene.Symbol.ID), ]
+
+
+#Tibble based on number of results filtered out for each criteria
+omim.results <- tibble(
+  Suitable = c("AAV", "LNP", "LV", "MM", "Full"),
+  Count = c(1147, 2289, 1875, 7675, 8787)
+)
+
+
+#Graph to show how many genes are viable for gene therapy out of all collected genetic defects
+omim.results.graph <- ggplot(omim.results, aes(x = Suitable, y = Count, fill = Suitable)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(
+    title = "Counts for Different Suitable Gene Therapy Vectors", 
+    x = "Criteriar", 
+    y = "Count"
+  ) +
+  scale_fill_manual(values = c("AAV" = "red", "LNP" = "blue", "LV" = "green", "MM" = "purple", "Full" = "black"))
+omim.results.graph
+
+
+ 
+
+```
+
+```{r}
+#Due to a lack of databases, limited analysis could be performed. As an exercise, I decided to create a table with randomized data to simulate what future analysis could look like
+
+#Adding a column for tropism, using 1=Liver, 2=Brain, 3=Heart, 4=Lung, 5=kidney
+
+omim.test <- omim3.gl
+
+omim.test$Tropism <- sample(1:5, nrow(omim.test), replace = TRUE)
+
+
+#Adding another column to simulate disease prevalence in society
+
+omim.test$Prevalence <- sample(1:250000, nrow(omim.test), replace = TRUE)
+
+
+#To visualize if there are trends between gene size and these new variables, I created a scatter plot
+
+ggplot(omim.test, aes(x=Gene.Length, y = Prevalence, color = Tropism)) +
+  geom_point() +
+  xlim(c(0, 10000)) #We mostly just need to focus on genes less than 10 kbs
+
+
+#If tropism and prevalence is truly random, the above scatter plot is what we would expect. However  this project is being done in hopes of finding trends so I am going to force a trend into Tropism by creating an altered set of propabilities
+
+Trop.weighted <- c(1,2,1,2,10) #create weighted probabilities
+
+omim.weighted <- omim3.gl
+omim.weighted$Tropism <- sample(1:5, nrow(omim.weighted), replace = TRUE, prob = Trop.weighted)
+omim.weighted$Prevalence <- sample(1:250000, nrow(omim.weighted), replace = TRUE)
+
+
+ggplot(omim.weighted, aes(x=Gene.Length, y = Prevalence, color = Tropism)) +
+  geom_point() +
+  xlim(c(0, 10000))
+
+
 
 ```
 
 ## Conclusion
 
-This the conclusion. The @sec-results can be invoked here.
+The biggest conclusion from this study was the reality that there is a lack of databases that exist publically with widespread data needed to support this type of analysis. Most databases seem tailored towards identification of the disease and phenotypes of the disease. Gene therapy is still a small field of medicine with only around 30 medications approved by the FDA currently, which is likely a reason for a lack of these databases.
+
+In the future, databases that include disease tropism, prevalence, and viable animal models would be a huge asset. When you have a vector that works well, it's likely to work well for other genes of similar size. So after sorting for a similar size, you also need to filter for tropism to make sure the gene selected will benefit from where it's delivered to. Prevalence could help someone decide which diseases to work on if there are multiple suitable candidates in order to reach a wider audience. And if your vector only works in certain animal models, a database containing existing animal models for a disease would help select for other similar diseases.
+
+Above, I attempted to simulate what the addition of a tropism and prevalence database would look like. Unfortunately the only viable way for me to do this was to randomly generate one. As seen in the first scatter plot, there doesn't seem to be a trend between any of the characteristics, but as the data was random this was largely expected. And when I tried to weight the randomness of the generation, results were different, but the prevalence was still randomized. So while no trend was seen, it still shows that creation of tables like these from databases can still be useful.
+
+For example, if I had a disease I had successfully implemented a cure for, I could then use this table to filter for genes euql to or less than the same gene length, filter for tropism, and sort by prevalence. This would give a top candidate that would likely have a high success rate if used.
